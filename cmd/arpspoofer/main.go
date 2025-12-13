@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Onyz107/arpspoofer/handle"
+	"github.com/Onyz107/arpspoofer/internal/sysctl"
 	"github.com/Onyz107/arpspoofer/spoof"
 	"github.com/urfave/cli/v2"
 )
@@ -30,7 +31,7 @@ func main() {
 	app := &cli.App{
 		Name:    os.Args[0],
 		Usage:   "A reliable ARP spoofer",
-		Version: "v1.0.4",
+		Version: "v1.0.5",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "target",
@@ -87,6 +88,10 @@ func main() {
 
 			if opts.Verbose {
 				log.Printf("Flags set:\n\t%#v\n", opts)
+			}
+
+			if err := sysctl.CheckSysctl(); err != nil {
+				return errors.Join(ErrInvalidSysctlSettings, err)
 			}
 
 			ifaceHandle, err := handle.Open(opts.Interface)
