@@ -31,7 +31,6 @@ func (a *ARPPkt) GetInfo() string {
 
 var bufPool = sync.Pool{
 	New: func() any {
-		buf := gopacket.NewSerializeBuffer()
-		return &buf
+		return gopacket.NewSerializeBuffer()
 	},
 }

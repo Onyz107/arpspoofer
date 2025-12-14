@@ -27,11 +27,10 @@ func BuildPkt(ifaceHWID net.HardwareAddr, srcIP net.IP, srcMAC net.HardwareAddr,
 		DstProtAddress:    []byte(dstIP.To4()),
 	}
 
-	bufPtr := bufPool.Get().(*gopacket.SerializeBuffer)
-	buf := *bufPtr
+	buf := bufPool.Get().(gopacket.SerializeBuffer)
 	defer func() {
 		buf.Clear()
-		bufPool.Put(bufPtr)
+		bufPool.Put(buf)
 	}()
 
 	opts := gopacket.SerializeOptions{
