@@ -46,7 +46,7 @@ func GetFromIP(ctx context.Context, ifaceHandle *handle.Handle, ip net.IP, verbo
 			}
 			arpPkt := arpLayer.(*layers.ARP)
 
-			if arpPkt.Operation == layers.ARPReply && net.IP(arpPkt.SourceProtAddress).Equal(ip) {
+			if arpPkt.Operation == uint16(arp.ARPReply) && net.IP(arpPkt.SourceProtAddress).Equal(ip) {
 				return net.HardwareAddr(arpPkt.SourceHwAddress), nil
 			}
 
