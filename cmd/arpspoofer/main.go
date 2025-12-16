@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -82,8 +83,8 @@ func main() {
 			if !isValidIPv4(opts.TargetIP) {
 				return ErrInvalidTargetIP
 			}
-			if !isValidInterface(opts.Interface) {
-				return ErrInvalidInterface
+			if ok, err := isValidInterface(opts.Interface); !ok {
+				return errors.Join(ErrInvalidInterface, err)
 			}
 
 			if opts.Verbose {
@@ -131,10 +132,41 @@ func isValidIPv4(ip string) bool {
 	return !(ip4 == nil || ip4.To4() == nil)
 }
 
-func isValidInterface(name string) bool {
+func isValidInterface(name string) (bool, error) {
 	iface, err := net.InterfaceByName(name)
 	if err != nil {
-		return false
+		return false, ErrInterfaceNotFound
 	}
-	return iface.Flags&net.FlagUp != 0
+
+	if !(iface.Flags&net.FlagUp != 0) {
+		return false, ErrInterfaceDown
+	}
+
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return false, ErrDialFailed
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ip := localAddr.IP
+
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return false, ErrInterfaceListFailed
+	}
+
+	for _, iface := range ifaces {
+		addrs, _ := iface.Addrs()
+		for _, addr := range addrs {
+			if ipnet, ok := addr.(*net.IPNet); ok && ipnet.IP.Equal(ip) {
+				if strings.EqualFold(iface.Name, name) {
+					return true, nil
+				}
+				return false, ErrIPNotOnInterface
+			}
+		}
+	}
+
+	return false, ErrIPNotOnInterface
 }
