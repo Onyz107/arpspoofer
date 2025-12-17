@@ -12,10 +12,13 @@ import (
 	"time"
 
 	"github.com/Onyz107/arpspoofer/handle"
+	"github.com/Onyz107/arpspoofer/internal/banner"
 	"github.com/Onyz107/arpspoofer/internal/sysctl"
 	"github.com/Onyz107/arpspoofer/spoof"
 	"github.com/urfave/cli/v2"
 )
+
+const version = "1.0.5"
 
 type options struct {
 	HostIP    string
@@ -27,12 +30,14 @@ type options struct {
 }
 
 func main() {
+	banner.PrintBanner("ARPspoofer", version)
+
 	opts := &options{}
 
 	app := &cli.App{
 		Name:    os.Args[0],
 		Usage:   "A reliable ARP spoofer",
-		Version: "v1.0.5",
+		Version: version,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "target",
