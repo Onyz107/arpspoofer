@@ -92,10 +92,6 @@ func main() {
 				return errors.Join(ErrInvalidInterface, err)
 			}
 
-			if opts.Verbose {
-				log.Printf("Flags set:\n\t%#v\n", opts)
-			}
-
 			if err := sysctl.CheckSysctl(); err != nil {
 				return errors.Join(ErrInvalidSysctlSettings, err)
 			}
