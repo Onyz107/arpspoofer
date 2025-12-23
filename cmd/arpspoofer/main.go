@@ -18,15 +18,17 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const version = "1.0.6"
+const version = "1.0.7"
 
 type options struct {
-	HostIP    string
-	TargetIP  string
-	Interface string
-	Interval  time.Duration
-	Restore   bool
-	Verbose   bool
+	HostIP        string
+	TargetIP      string
+	Interface     string
+	Interval      time.Duration
+	Restore       bool
+	Verbose       bool
+	DisableIP     bool
+	DisableSysctl bool
 }
 
 func main() {
@@ -80,20 +82,38 @@ func main() {
 				Value:       false,
 				Destination: &opts.Verbose,
 			},
+			&cli.BoolFlag{
+				Name:        "disable-ip",
+				Aliases:     []string{"di"},
+				Usage:       "Disable IP address checks",
+				Value:       false,
+				Destination: &opts.DisableIP,
+			},
+			&cli.BoolFlag{
+				Name:        "disable-sysctl",
+				Aliases:     []string{"ds"},
+				Usage:       "Disable sysctl checks",
+				Value:       false,
+				Destination: &opts.DisableSysctl,
+			},
 		},
 		Action: func(c *cli.Context) error {
-			if !isValidIPv4(opts.HostIP) {
-				return ErrInvalidHostIP
-			}
-			if !isValidIPv4(opts.TargetIP) {
-				return ErrInvalidTargetIP
-			}
-			if ok, err := isValidInterface(opts.Interface); !ok {
-				return errors.Join(ErrInvalidInterface, err)
+			if !opts.DisableIP {
+				if !isValidIPv4(opts.HostIP) {
+					return ErrInvalidHostIP
+				}
+				if !isValidIPv4(opts.TargetIP) {
+					return ErrInvalidTargetIP
+				}
+				if ok, err := isValidInterface(opts.Interface); !ok {
+					return errors.Join(ErrInvalidInterface, err)
+				}
 			}
 
-			if err := sysctl.CheckSysctl(); err != nil {
-				return errors.Join(ErrInvalidSysctlSettings, err)
+			if !opts.DisableSysctl {
+				if err := sysctl.CheckSysctl(); err != nil {
+					return errors.Join(ErrInvalidSysctlSettings, err)
+				}
 			}
 
 			ifaceHandle, err := handle.Open(opts.Interface)
