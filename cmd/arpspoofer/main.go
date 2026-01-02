@@ -13,12 +13,12 @@ import (
 	"github.com/Onyz107/arpspoofer/handle"
 	"github.com/Onyz107/arpspoofer/internal/banner"
 	"github.com/Onyz107/arpspoofer/internal/logger"
-	"github.com/Onyz107/arpspoofer/internal/sysctl"
 	"github.com/Onyz107/arpspoofer/spoof"
+	"github.com/Onyz107/arpspoofer/sysctl"
 	"github.com/urfave/cli/v2"
 )
 
-const version = "1.0.7"
+const version = "1.1.0"
 
 type options struct {
 	HostIP        string
