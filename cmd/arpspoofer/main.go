@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/Onyz107/arpspoofer/handle"
 	"github.com/Onyz107/arpspoofer/internal/banner"
+	"github.com/Onyz107/arpspoofer/internal/logger"
 	"github.com/Onyz107/arpspoofer/internal/sysctl"
 	"github.com/Onyz107/arpspoofer/spoof"
 	"github.com/urfave/cli/v2"
@@ -130,21 +130,21 @@ func main() {
 				return errors.Join(ErrStartSpoofing, err)
 			}
 
-			log.Println("ARP spoofing started. Press Ctrl+C to stop.")
+			logger.Logger.Warn("ARP spoofing started. Press Ctrl+C to stop.")
 			sigCtx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 			defer cancel()
 
 			<-sigCtx.Done()
-			log.Println("Stopping ARP spoofing.")
+			logger.Logger.Warn("Stopping ARP spoofing.")
 			stop()
-			log.Println("ARP spoofing stopped.")
+			logger.Logger.Info("ARP spoofing stopped.")
 
 			return nil
 		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		logger.Logger.Fatal("failed to run app", "err", err)
 	}
 }
 

@@ -19,7 +19,7 @@ func (a *ARPPkt) Bytes() []byte {
 	return a.bytes
 }
 
-func (a *ARPPkt) GetInfo() string {
+func (a *ARPPkt) String() string {
 	if a.operation == ARPRequest {
 		return fmt.Sprintf("ARP Request: Who has %s? Tell %s at %s --> %s", a.dstIP.To4().String(), a.srcIP.To4().String(),
 			a.srcMAC.String(), a.dstMAC.String())

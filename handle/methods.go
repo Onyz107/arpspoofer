@@ -1,10 +1,10 @@
 package handle
 
 import (
-	"log"
 	"net"
 
 	"github.com/Onyz107/arpspoofer/internal/arp"
+	"github.com/Onyz107/arpspoofer/internal/logger"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 )
@@ -17,7 +17,7 @@ type Handle struct {
 
 func (h *Handle) WritePacketData(pkt *arp.ARPPkt, verbose bool) error {
 	if verbose {
-		log.Println(pkt.GetInfo())
+		logger.Logger.Info(pkt.String())
 	}
 	return h.handle.WritePacketData(pkt.Bytes())
 }

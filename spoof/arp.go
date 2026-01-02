@@ -3,7 +3,6 @@ package spoof
 import (
 	"context"
 	"errors"
-	"log"
 	"net"
 	"sync"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/Onyz107/arpspoofer/handle"
 	"github.com/Onyz107/arpspoofer/internal/arp"
 	"github.com/Onyz107/arpspoofer/internal/hwid"
+	"github.com/Onyz107/arpspoofer/internal/logger"
 )
 
 func Spoof(ctx context.Context, ifaceHandle *handle.Handle, hostIP, targetIP net.IP,
@@ -56,17 +56,17 @@ func Spoof(ctx context.Context, ifaceHandle *handle.Handle, hostIP, targetIP net
 				return
 			case <-ticker.C:
 				if err := ifaceHandle.WritePacketData(pktToHost, verbose); err != nil {
-					log.Printf("error sending packet to host: %v\n", err)
+					logger.Logger.Errorf("error sending packet to host: %v\n", err)
 					errCount++
 				}
 
 				if err := ifaceHandle.WritePacketData(pktToTarget, verbose); err != nil {
-					log.Printf("error sending packet to target: %v\n", err)
+					logger.Logger.Errorf("error sending packet to target: %v\n", err)
 					errCount++
 				}
 
 				if errCount >= errThreshold {
-					log.Printf("exceeded error threshold, stopping spoofing\n")
+					logger.Logger.Errorf("exceeded error threshold, stopping spoofing\n")
 					cancel()
 					return
 				}
@@ -80,7 +80,7 @@ func Spoof(ctx context.Context, ifaceHandle *handle.Handle, hostIP, targetIP net
 		if restore {
 			if err := restoreARP(ifaceHandle, hostIP, targetIP,
 				hostHWID, targetHWID, interval, verbose); err != nil {
-				log.Printf("error restoring ARP tables: %v\n", err)
+				logger.Logger.Errorf("error restoring ARP tables: %v\n", err)
 			}
 		}
 	}
@@ -109,10 +109,10 @@ func restoreARP(ifaceHandle *handle.Handle, hostIP, targetIP net.IP,
 		<-ticker.C
 
 		if err := ifaceHandle.WritePacketData(pktToHost, verbose); err != nil {
-			log.Printf("error restoring packet to host: %v\n", err)
+			logger.Logger.Errorf("error restoring packet to host: %v\n", err)
 		}
 		if err := ifaceHandle.WritePacketData(pktToTarget, verbose); err != nil {
-			log.Printf("error restoring packet to target: %v\n", err)
+			logger.Logger.Errorf("error restoring packet to target: %v\n", err)
 		}
 	}
 	return nil
